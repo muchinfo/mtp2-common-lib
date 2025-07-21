@@ -1,4 +1,4 @@
-module mtp2-common-lib
+module github.com/muchinfo/mtp2-common-lib
 
 go 1.24.3
 

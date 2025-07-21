@@ -17,7 +17,7 @@
 ```go
 import (
     "go.uber.org/zap"
-    "mtp2-common-lib/mq"
+    "github.com/muchinfo/mtp2-common-lib/mq"
 )
 
 logger, _ := zap.NewProduction()

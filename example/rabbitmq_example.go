@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"mtp2-common-lib/mq"
 	"time"
+
+	"github.com/muchinfo/mtp2-common-lib/mq"
 
 	"go.uber.org/zap"
 )

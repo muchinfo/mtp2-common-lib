@@ -18,7 +18,7 @@ Muchinfo MTP2 通用 Go 组件库，适用于企业级微服务、后台系统�
 高性能 zap 日志，支持自定义配置、开发/生产模式、日志轮转。
 
 ```go
-import "mtp2-common-lib/logger"
+import "github.com/muchinfo/mtp2-common-lib/logger"
 logger.Init(nil) // 或 InitDevelopment/InitProduction
 logger.Info("hello", zap.String("key", "value"))
 ```
@@ -30,7 +30,7 @@ logger.Info("hello", zap.String("key", "value"))
 多文件合并、热更新，基于 viper。
 
 ```go
-import "mtp2-common-lib/config"
+import "github.com/muchinfo/mtp2-common-lib/config"
 var cfg struct{ Name string }
 config.InitViper([]string{"config.yaml"}, &cfg, func(e fsnotify.Event) { /* ... */ })
 ```
@@ -43,7 +43,7 @@ RabbitMQ 客户端，支持 zap.Logger 注入、并发消费、断网重连。
 
 ```go
 import (
-    "mtp2-common-lib/mq"
+    "github.com/muchinfo/mtp2-common-lib/mq"
     "go.uber.org/zap"
 )
 logger, _ := zap.NewProduction()
@@ -59,7 +59,7 @@ Oracle 数据库 xorm 封装，支持 zap.Logger、慢SQL统计、熔断、健�
 
 ```go
 import (
-    "mtp2-common-lib/database"
+    "github.com/muchinfo/mtp2-common-lib/database"
     "go.uber.org/zap"
     "time"
 )
@@ -76,7 +76,7 @@ database.AutoMigrate(engine)
 标准 HTTP 请求工具，支持 context、自定义 client、logger，内置常用签名算法（MD5、HMAC-SHA256、RSA）及 RSA 加解密。
 
 ```go
-import "mtp2-common-lib/http"
+import "github.com/muchinfo/mtp2-common-lib/http"
 // GET 请求
 resp, status, header, err := http.HttpCall("GET", "https://httpbin.org/get", nil, nil, nil)
 // POST JSON

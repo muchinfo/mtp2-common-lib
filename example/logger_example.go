@@ -1,7 +1,7 @@
 package main
 
 import (
-	"mtp2-common-lib/logger"
+	"github.com/muchinfo/mtp2-common-lib/logger"
 
 	"go.uber.org/zap"
 )

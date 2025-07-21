@@ -13,7 +13,8 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"mtp2-common-lib/utils"
+
+	"github.com/muchinfo/mtp2-common-lib/utils"
 )
 
 // SignWithRSA 使用PKCS8格式的私钥对数据进行SHA256WithRSA签名

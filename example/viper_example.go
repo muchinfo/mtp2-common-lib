@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"mtp2-common-lib/config"
+
+	"github.com/muchinfo/mtp2-common-lib/config"
 
 	"github.com/fsnotify/fsnotify"
 )

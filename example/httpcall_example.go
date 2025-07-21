@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	mhttp "mtp2-common-lib/http"
 	"net/http"
 	"net/url"
 	"time"
+
+	mhttp "github.com/muchinfo/mtp2-common-lib/http"
 )
 
 func RunHttpExample() {

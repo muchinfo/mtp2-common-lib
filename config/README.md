@@ -25,7 +25,7 @@
 ```go
 import (
     "github.com/fsnotify/fsnotify"
-    "mtp2-common-lib/config"
+    "github.com/muchinfo/mtp2-common-lib/config"
 )
 
 func main() {

@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"mtp2-common-lib/database"
 	"os"
 	"time"
+
+	"github.com/muchinfo/mtp2-common-lib/database"
 
 	"go.uber.org/zap"
 )
