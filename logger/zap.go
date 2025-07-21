@@ -68,7 +68,7 @@ func Init(config *Config) error {
 	// 配置编码器
 	var encoder zapcore.Encoder
 	encoderConfig := zap.NewProductionEncoderConfig()
-	encoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05")
+	encoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05.000")
 	encoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
 
 	if config.Format == "console" {
@@ -77,12 +77,13 @@ func Init(config *Config) error {
 		encoder = zapcore.NewJSONEncoder(encoderConfig)
 	}
 
-	// 配置日志轮转
+	// 配置日志轮转，按自然小时切割
 	writer, err := rotatelogs.New(
 		config.OutputPath+".%Y%m%d%H",
 		rotatelogs.WithLinkName(config.OutputPath),
 		rotatelogs.WithMaxAge(time.Duration(config.MaxAge)*24*time.Hour),
-		rotatelogs.WithRotationTime(time.Duration(config.Rotation)*time.Hour),
+		rotatelogs.WithRotationTime(time.Hour), // 强制每个自然小时切割
+		rotatelogs.WithClock(rotatelogs.Local), // 使用本地时钟，确保自然小时
 	)
 	if err != nil {
 		return fmt.Errorf("配置日志轮转失败: %w", err)

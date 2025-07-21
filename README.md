@@ -4,11 +4,12 @@ Muchinfo MTP2 通用 Go 组件库，适用于企业级微服务、后台系统�
 
 ## 目录结构
 
-- logger/   —— 高性能 zap 日志组件，支持日志轮转、结构化、糖化日志
-- config/   —— 基于 viper 的多文件配置加载与热更新
-- mq/       —— RabbitMQ 并发安全客户端，支持 zap 日志、断网重连
-- database/ —— Oracle 数据库 xorm 封装，支持 zap 日志、慢SQL、熔断
-- example/  —— 各模块独立示例
+- logger/    —— 高性能 zap 日志组件，支持日志轮转、结构化、糖化日志
+- config/    —— 基于 viper 的多文件配置加载与热更新
+- mq/        —— RabbitMQ 并发安全客户端，支持 zap 日志、断网重连
+- database/  —— Oracle 数据库 xorm 封装，支持 zap 日志、慢SQL、熔断
+- http/      —— 标准 HTTP 请求、签名、加解密等工具
+- example/   —— 各模块独立示例
 
 ## 快速开始
 
@@ -70,7 +71,22 @@ database.AutoMigrate(engine)
 
 详见 [database/README.md](database/README.md)
 
-### 5. 示例
+### 5. HTTP 工具 http
+
+标准 HTTP 请求工具，支持 context、自定义 client、logger，内置常用签名算法（MD5、HMAC-SHA256、RSA）及 RSA 加解密。
+
+```go
+import "mtp2-common-lib/http"
+// GET 请求
+resp, status, header, err := http.HttpCall("GET", "https://httpbin.org/get", nil, nil, nil)
+// POST JSON
+data := map[string]any{"foo": "bar"}
+resp, status, _, err := http.HttpCall("POST", "https://httpbin.org/post", data, nil, nil)
+```
+
+详见 [http/README.md](http/README.md)
+
+### 6. 示例
 
 所有模块均有独立 example 文件，见 [example/](example/)
 
@@ -81,6 +97,7 @@ database.AutoMigrate(engine)
 - [github.com/rabbitmq/amqp091-go](https://github.com/rabbitmq/amqp091-go)
 - [xorm.io/xorm](https://xorm.io/)
 - [github.com/godror/godror](https://github.com/godror/godror)
+- [github.com/fsnotify/fsnotify](https://github.com/fsnotify/fsnotify)
 
 ## 贡献
 

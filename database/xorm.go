@@ -117,20 +117,20 @@ type ZapXormLogger struct {
 	slowThreshold time.Duration
 }
 
-func (z *ZapXormLogger) Debug(v ...interface{}) { z.logger.Debug(sprint(v...)) }
-func (z *ZapXormLogger) Debugf(format string, v ...interface{}) {
+func (z *ZapXormLogger) Debug(v ...any) { z.logger.Debug(sprint(v...)) }
+func (z *ZapXormLogger) Debugf(format string, v ...any) {
 	z.logger.Debug(fmt.Sprintf(format, v...))
 }
-func (z *ZapXormLogger) Error(v ...interface{}) { z.logger.Error(sprint(v...)) }
-func (z *ZapXormLogger) Errorf(format string, v ...interface{}) {
+func (z *ZapXormLogger) Error(v ...any) { z.logger.Error(sprint(v...)) }
+func (z *ZapXormLogger) Errorf(format string, v ...any) {
 	z.logger.Error(fmt.Sprintf(format, v...))
 }
-func (z *ZapXormLogger) Info(v ...interface{}) { z.logger.Info(sprint(v...)) }
-func (z *ZapXormLogger) Infof(format string, v ...interface{}) {
+func (z *ZapXormLogger) Info(v ...any) { z.logger.Info(sprint(v...)) }
+func (z *ZapXormLogger) Infof(format string, v ...any) {
 	z.logger.Info(fmt.Sprintf(format, v...))
 }
-func (z *ZapXormLogger) Warn(v ...interface{}) { z.logger.Warn(sprint(v...)) }
-func (z *ZapXormLogger) Warnf(format string, v ...interface{}) {
+func (z *ZapXormLogger) Warn(v ...any) { z.logger.Warn(sprint(v...)) }
+func (z *ZapXormLogger) Warnf(format string, v ...any) {
 	z.logger.Warn(fmt.Sprintf(format, v...))
 }
 func (z *ZapXormLogger) Level() log.LogLevel     { return z.level }
@@ -143,18 +143,20 @@ func (z *ZapXormLogger) ShowSQL(show ...bool) {
 func (z *ZapXormLogger) IsShowSQL() bool { return z.showSQL }
 
 // 慢 SQL 统计
-func (z *ZapXormLogger) BeforeSQL(ctx context.Context, sql string, args ...interface{}) context.Context {
-	return context.WithValue(ctx, "start", time.Now())
+type ctxKeyStartTime struct{}
+
+func (z *ZapXormLogger) BeforeSQL(ctx context.Context, sql string, args ...any) context.Context {
+	return context.WithValue(ctx, ctxKeyStartTime{}, time.Now())
 }
-func (z *ZapXormLogger) AfterSQL(ctx context.Context, sql string, args ...interface{}) {
-	start, _ := ctx.Value("start").(time.Time)
+func (z *ZapXormLogger) AfterSQL(ctx context.Context, sql string, args ...any) {
+	start, _ := ctx.Value(ctxKeyStartTime{}).(time.Time)
 	cost := time.Since(start)
 	if z.slowThreshold > 0 && cost > z.slowThreshold {
 		z.logger.Warn("[XORM] 慢SQL", zap.String("sql", sql), zap.Duration("cost", cost))
 	}
 }
 
-func sprint(v ...interface{}) string {
+func sprint(v ...any) string {
 	return fmt.Sprint(v...)
 }
 
@@ -166,7 +168,7 @@ func Ping(engine *xorm.Engine) error {
 // TryReconnect 尝试断线重连
 func TryReconnect(engine **xorm.Engine, dsn string, maxRetry int) error {
 	var err error
-	for i := 0; i < maxRetry; i++ {
+	for range maxRetry {
 		if *engine != nil {
 			(*engine).Close()
 		}

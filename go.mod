@@ -7,6 +7,7 @@ require (
 	github.com/godror/godror v0.49.0
 	github.com/google/uuid v1.6.0
 	github.com/lestrrat/go-file-rotatelogs v0.0.0-20180223000712-d3151e2a480f
+	github.com/oklog/ulid/v2 v2.0.2
 	github.com/rabbitmq/amqp091-go v1.10.0
 	github.com/spf13/viper v1.20.1
 	go.uber.org/zap v1.27.0

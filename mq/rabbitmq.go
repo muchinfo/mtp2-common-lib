@@ -16,6 +16,11 @@ type RabbitMQClient struct {
 	mutex  sync.Mutex
 	closed bool
 	logger *zap.Logger
+
+	// 新增：可选的 exchange 预声明配置
+	predeclareExchange     bool
+	predeclaredExchange    string
+	predeclaredExchangeTyp string
 }
 
 // NewRabbitMQClient 创建客户端
@@ -23,6 +28,31 @@ type RabbitMQClient struct {
 func NewRabbitMQClient(url string, logger *zap.Logger) (*RabbitMQClient, error) {
 	client := &RabbitMQClient{url: url, logger: logger}
 	err := client.connectWithRetry()
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
+}
+
+// NewRabbitMQClientWithExchange 高性能模式：初始化时声明 Exchange，后续 Publish/Consume 不再声明 Exchange
+func NewRabbitMQClientWithExchange(url, exchange, exchangeType string, logger *zap.Logger) (*RabbitMQClient, error) {
+	client := &RabbitMQClient{
+		url: url, logger: logger,
+		predeclareExchange:     true,
+		predeclaredExchange:    exchange,
+		predeclaredExchangeTyp: exchangeType,
+	}
+	err := client.connectWithRetry()
+	if err != nil {
+		return nil, err
+	}
+	// 初始化时声明 Exchange
+	ch, err := client.Channel()
+	if err != nil {
+		return nil, err
+	}
+	defer ch.Close()
+	err = ch.ExchangeDeclare(exchange, exchangeType, false, false, false, false, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -71,10 +101,10 @@ func (c *RabbitMQClient) Close() error {
 	return nil
 }
 
-// 并发安全的生产者
-func (c *RabbitMQClient) Publish(queueName string, body []byte) error {
+// Publish 支持自定义 exchange 和 routingKey，兼容原有用法
+func (c *RabbitMQClient) PublishWithExchange(exchange, exchangeType, routingKey string, body []byte) error {
 	var lastErr error
-	for i := 0; i < 3; i++ { // 最多重试3次
+	for i := 0; i < 3; i++ {
 		ch, err := c.Channel()
 		if err != nil {
 			lastErr = err
@@ -82,16 +112,22 @@ func (c *RabbitMQClient) Publish(queueName string, body []byte) error {
 			continue
 		}
 		defer ch.Close()
-		_, err = ch.QueueDeclare(
-			queueName, true, false, false, false, nil,
-		)
-		if err != nil {
-			lastErr = err
-			time.Sleep(500 * time.Millisecond)
-			continue
+		// 高性能模式：只在初始化声明 Exchange
+		if c.predeclareExchange && exchange == c.predeclaredExchange {
+			// 不再声明 Exchange
+		} else if exchange != "" {
+			// 兼容模式：每次声明 Exchange
+			err = ch.ExchangeDeclare(
+				exchange, exchangeType, false, false, false, false, nil,
+			)
+			if err != nil {
+				lastErr = err
+				time.Sleep(500 * time.Millisecond)
+				continue
+			}
 		}
 		err = ch.PublishWithContext(context.Background(),
-			"", queueName, false, false,
+			exchange, routingKey, false, false,
 			amqp.Publishing{
 				ContentType: "text/plain",
 				Body:        body,
@@ -106,8 +142,13 @@ func (c *RabbitMQClient) Publish(queueName string, body []byte) error {
 	return lastErr
 }
 
-// 并发消费者，支持指定并发数
-func (c *RabbitMQClient) Consume(queueName string, concurrency int, handler func(msg string)) error {
+// 兼容原有用法：Publish(queueName, body) 等价于 PublishWithExchange("", "", queueName, body)
+func (c *RabbitMQClient) Publish(queueName string, body []byte) error {
+	return c.PublishWithExchange("", "", queueName, body)
+}
+
+// Consume 支持自定义 exchange 和 routingKey，兼容原有用法
+func (c *RabbitMQClient) ConsumeWithExchange(exchange, exchangeType, queueName, routingKey string, concurrency int, handler func(msg string)) error {
 	var wg sync.WaitGroup
 	for i := 0; i < concurrency; i++ {
 		wg.Add(1)
@@ -122,8 +163,26 @@ func (c *RabbitMQClient) Consume(queueName string, concurrency int, handler func
 					time.Sleep(time.Second)
 					continue
 				}
+				// 高性能模式：只在初始化声明 Exchange
+				if c.predeclareExchange && exchange == c.predeclaredExchange {
+					// 不再声明 Exchange
+				} else if exchange != "" {
+					// 兼容模式：每次声明 Exchange
+					err = ch.ExchangeDeclare(
+						exchange, exchangeType, false, false, false, false, nil,
+					)
+					if err != nil {
+						ch.Close()
+						if c.logger != nil {
+							c.logger.Error("[RabbitMQ] Exchange声明失败，1秒后重试", zap.Error(err))
+						}
+						time.Sleep(time.Second)
+						continue
+					}
+				}
+				// 声明队列并绑定到 exchange
 				_, err = ch.QueueDeclare(
-					queueName, true, false, false, false, nil,
+					queueName, false, false, false, false, nil,
 				)
 				if err != nil {
 					ch.Close()
@@ -133,8 +192,21 @@ func (c *RabbitMQClient) Consume(queueName string, concurrency int, handler func
 					time.Sleep(time.Second)
 					continue
 				}
+				if exchange != "" {
+					err = ch.QueueBind(
+						queueName, routingKey, exchange, false, nil,
+					)
+					if err != nil {
+						ch.Close()
+						if c.logger != nil {
+							c.logger.Error("[RabbitMQ] 队列绑定失败，1秒后重试", zap.Error(err))
+						}
+						time.Sleep(time.Second)
+						continue
+					}
+				}
 				msgs, err := ch.Consume(
-					queueName, "", true, false, false, false, nil,
+					queueName, "", false, false, false, false, nil,
 				)
 				if err != nil {
 					ch.Close()
@@ -148,7 +220,6 @@ func (c *RabbitMQClient) Consume(queueName string, concurrency int, handler func
 					handler(string(d.Body))
 				}
 				ch.Close()
-				// 如果 msgs 被关闭，说明连接断开，自动重连
 				if c.logger != nil {
 					c.logger.Warn("[RabbitMQ] 消费通道关闭，1秒后重连")
 				}
@@ -158,4 +229,9 @@ func (c *RabbitMQClient) Consume(queueName string, concurrency int, handler func
 	}
 	go func() { wg.Wait() }()
 	return nil
+}
+
+// 兼容原有用法：Consume(queueName, concurrency, handler) 等价于 ConsumeWithExchange("", "", queueName, queueName, concurrency, handler)
+func (c *RabbitMQClient) Consume(queueName string, concurrency int, handler func(msg string)) error {
+	return c.ConsumeWithExchange("", "", queueName, queueName, concurrency, handler)
 }
