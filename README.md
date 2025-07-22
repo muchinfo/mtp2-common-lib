@@ -9,6 +9,7 @@ Muchinfo MTP2 通用 Go 组件库，适用于企业级微服务、后台系统�
 - mq/        —— RabbitMQ 并发安全客户端，支持 zap 日志、断网重连
 - database/  —— Oracle 数据库 xorm 封装，支持 zap 日志、慢SQL、熔断
 - http/      —— 标准 HTTP 请求、签名、加解密等工具
+- socket/    —— TCP 网络通信组件，支持客户端、服务器、自动重连、消息广播
 - example/   —— 各模块独立示例
 
 ## 快速开始
@@ -19,9 +20,15 @@ Muchinfo MTP2 通用 Go 组件库，适用于企业级微服务、后台系统�
 
 ```go
 import "github.com/muchinfo/mtp2-common-lib/logger"
-logger.Init(nil) // 或 InitDevelopment/InitProduction
+config := &logger.Config{ /* ... */ }
+if err := logger.Init(config); err != nil {
+    panic(err)
+}
 logger.Info("hello", zap.String("key", "value"))
 ```
+
+// 兼容老用法（仅本项目内部用）
+// logger.Init(nil) // 或 InitDevelopment/InitProduction
 
 详见 [logger/README.md](logger/README.md)
 
@@ -86,7 +93,34 @@ resp, status, _, err := http.HttpCall("POST", "https://httpbin.org/post", data, 
 
 详见 [http/README.md](http/README.md)
 
-### 6. 示例
+### 6. TCP 网络通信 socket
+
+TCP 客户端和服务器组件，支持自动重连、消息广播、回调处理等企业级功能。
+
+```go
+import "github.com/muchinfo/mtp2-common-lib/socket"
+// TCP 客户端
+config := socket.TCPClientConfig{
+    Address: "localhost:8080",
+    AutoReconnect: true,
+}
+client := socket.NewTCPClient(config)
+client.Connect()
+client.SendString("Hello, Server!")
+
+// TCP 服务器
+serverConfig := socket.TCPServerConfig{
+    Address: ":8080",
+    MaxConnections: 100,
+}
+server := socket.NewTCPServer(serverConfig)
+server.Start()
+server.BroadcastString("Hello, All Clients!")
+```
+
+详见 [socket/README.md](socket/README.md)
+
+### 7. 示例
 
 所有模块均有独立 example 文件，见 [example/](example/)
 
@@ -98,7 +132,3 @@ resp, status, _, err := http.HttpCall("POST", "https://httpbin.org/post", data, 
 - [xorm.io/xorm](https://xorm.io/)
 - [github.com/godror/godror](https://github.com/godror/godror)
 - [github.com/fsnotify/fsnotify](https://github.com/fsnotify/fsnotify)
-
-## 贡献
-
-欢迎 issue、PR 与建议！

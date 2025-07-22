@@ -16,7 +16,8 @@ func RunLoggerExample() {
 		Rotation:   24, // 24小时切割一次
 	}
 
-	if err := logger.Init(config); err != nil {
+	// 推荐外部项目使用 InitWithCallerSkip(config, 2)，保证日志调用栈定位到业务代码
+	if err := logger.InitWithCallerSkip(config, 2); err != nil {
 		panic("初始化日志失败: " + err.Error())
 	}
 	defer logger.Close()

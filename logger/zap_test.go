@@ -6,6 +6,21 @@ import (
 	"go.uber.org/zap"
 )
 
+func TestInitWithCallerSkip(t *testing.T) {
+	config := DefaultConfig()
+	err := InitWithCallerSkip(config, 0)
+	if err != nil {
+		t.Fatalf("InitWithCallerSkip failed: %v", err)
+	}
+	defer Close()
+	if Logger == nil {
+		t.Error("Logger 未初始化")
+	}
+	if SugarLogger == nil {
+		t.Error("SugarLogger 未初始化")
+	}
+}
+
 func TestDefaultConfig(t *testing.T) {
 	config := DefaultConfig()
 	if config.Level != "info" {

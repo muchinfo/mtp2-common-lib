@@ -38,8 +38,13 @@ func DefaultConfig() *Config {
 	}
 }
 
-// Init 初始化日志
+// Init 初始化日志，callerSkip 控制调用栈跳过层数（建议外部项目传0）
 func Init(config *Config) error {
+	return InitWithCallerSkip(config, 0)
+}
+
+// InitWithCallerSkip 支持自定义 callerSkip，适用于库被外部调用时调用栈定位
+func InitWithCallerSkip(config *Config, callerSkip int) error {
 	if config == nil {
 		config = DefaultConfig()
 	}
@@ -100,7 +105,7 @@ func Init(config *Config) error {
 	)
 
 	// 创建 Logger
-	Logger = zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
+	Logger = zap.New(core, zap.AddCaller(), zap.AddCallerSkip(callerSkip))
 	SugarLogger = Logger.Sugar()
 
 	return nil
@@ -108,10 +113,15 @@ func Init(config *Config) error {
 
 // InitDevelopment 初始化开发环境日志 (简化配置)
 func InitDevelopment() error {
+	return InitDevelopmentWithCallerSkip(1)
+}
+
+// InitDevelopmentWithCallerSkip 支持自定义 callerSkip
+func InitDevelopmentWithCallerSkip(callerSkip int) error {
 	config := zap.NewDevelopmentConfig()
 	config.EncoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05")
 
-	logger, err := config.Build(zap.AddCallerSkip(1))
+	logger, err := config.Build(zap.AddCallerSkip(callerSkip))
 	if err != nil {
 		return fmt.Errorf("初始化开发环境日志失败: %w", err)
 	}
@@ -123,10 +133,15 @@ func InitDevelopment() error {
 
 // InitProduction 初始化生产环境日志 (简化配置)
 func InitProduction() error {
+	return InitProductionWithCallerSkip(1)
+}
+
+// InitProductionWithCallerSkip 支持自定义 callerSkip
+func InitProductionWithCallerSkip(callerSkip int) error {
 	config := zap.NewProductionConfig()
 	config.EncoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05")
 
-	logger, err := config.Build(zap.AddCallerSkip(1))
+	logger, err := config.Build(zap.AddCallerSkip(callerSkip))
 	if err != nil {
 		return fmt.Errorf("初始化生产环境日志失败: %w", err)
 	}

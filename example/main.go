@@ -9,7 +9,7 @@ import (
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Println("用法: go run . [模块名]")
-		fmt.Println("可选模块: viper | logger | rabbitmq | xorm | ulidgen | http | all")
+		fmt.Println("可选模块: viper | logger | rabbitmq | xorm | ulidgen | http | socket_client | socket_server | all")
 		return
 	}
 	arg := strings.ToLower(os.Args[1])
@@ -32,6 +32,12 @@ func main() {
 	case "http":
 		fmt.Println("--- HTTP Example ---")
 		RunHttpExample()
+	case "socket_client":
+		fmt.Println("--- Socket Client Example ---")
+		RunSocketClientExample()
+	case "socket_server":
+		fmt.Println("--- Socket Server Example ---")
+		RunSocketServerExample()
 	case "all":
 		fmt.Println("--- Viper Example ---")
 		RunViperExample()
@@ -45,8 +51,12 @@ func main() {
 		RunULIDGenExample()
 		fmt.Println("--- HTTP Example ---")
 		RunHttpExample()
+		fmt.Println("--- Socket Client Example ---")
+		RunSocketClientExample()
+		fmt.Println("--- Socket Server Example ---")
+		RunSocketServerExample()
 	default:
 		fmt.Println("未知模块:", arg)
-		fmt.Println("可选模块: viper | logger | rabbitmq | xorm | ulidgen | http | all")
+		fmt.Println("可选模块: viper | logger | rabbitmq | xorm | ulidgen | http | socket_client | socket_server | all")
 	}
 }
