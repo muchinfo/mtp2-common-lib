@@ -139,12 +139,9 @@ func RunWebSocketServerExample() {
 		ticker := time.NewTicker(60 * time.Second)
 		defer ticker.Stop()
 
-		for {
-			select {
-			case <-ticker.C:
-				log.Printf("📊 Server status - Address: %s, Path: %s, Connections: %d, Running: %v",
-					server.GetAddress(), config.Path, server.GetClientCount(), server.IsRunning())
-			}
+		for range ticker.C {
+			log.Printf("📊 Server status - Address: %s, Path: %s, Connections: %d, Running: %v",
+				server.GetAddress(), config.Path, server.GetClientCount(), server.IsRunning())
 		}
 	}()
 

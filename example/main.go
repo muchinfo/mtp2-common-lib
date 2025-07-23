@@ -9,7 +9,7 @@ import (
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Println("用法: go run . [模块名]")
-		fmt.Println("可选模块: viper | logger | rabbitmq | xorm | ulidgen | http | socket_client | socket_server | websocket_client | websocket_server | all")
+		fmt.Println("可选模块: viper | logger | rabbitmq | xorm | ulidgen | http | socket_client | socket_server | websocket_client | websocket_server | redis | all")
 		return
 	}
 	arg := strings.ToLower(os.Args[1])
@@ -44,6 +44,9 @@ func main() {
 	case "websocket_server":
 		fmt.Println("--- WebSocket Server Example ---")
 		RunWebSocketServerExample()
+	case "redis":
+		fmt.Println("--- Redis Example ---")
+		RunRedisExample()
 	case "all":
 		fmt.Println("--- Viper Example ---")
 		RunViperExample()
@@ -65,8 +68,10 @@ func main() {
 		RunWebSocketClientExample()
 		fmt.Println("--- WebSocket Server Example ---")
 		RunWebSocketServerExample()
+		fmt.Println("--- Redis Example ---")
+		RunRedisExample()
 	default:
 		fmt.Println("未知模块:", arg)
-		fmt.Println("可选模块: viper | logger | rabbitmq | xorm | ulidgen | http | socket_client | socket_server | websocket_client | websocket_server | all")
+		fmt.Println("可选模块: viper | logger | rabbitmq | xorm | ulidgen | http | socket_client | socket_server | websocket_client | websocket_server | redis | all")
 	}
 }

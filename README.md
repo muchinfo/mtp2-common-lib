@@ -147,7 +147,38 @@ server := websocket.NewWSServer(serverConfig)
 
 详见 [websocket/README.md](websocket/README.md)
 
-### 8. 示例
+### 8. Redis 数据库操作
+
+Redis 组件为调用者提供 Redis 常用操作功能，支持字符串、哈希、列表、集合、有序集合等数据类型操作，以及发布订阅、事务、JSON序列化等高级功能。
+
+```go
+import "github.com/muchinfo/mtp2-common-lib/redis"
+
+// 创建Redis客户端
+config := redis.RedisConfig{
+    Address:      "localhost:6379",
+    Password:     "",
+    Database:     0,
+    PoolSize:     10,
+    MinIdleConns: 2,
+    DialTimeout:  5 * time.Second,
+}
+client, err := redis.NewRedisClient(config)
+
+// 基础操作
+client.Set("key", "value", time.Hour)
+value, err := client.Get("key")
+
+// JSON操作
+user := User{ID: 1, Name: "Alice"}
+client.SetJSON("user:1", user, time.Hour)
+var retrievedUser User
+client.GetJSON("user:1", &retrievedUser)
+```
+
+详见 [redis/README.md](redis/README.md)
+
+### 9. 示例
 
 所有模块均有独立 example 文件，见 [example/](example/)
 
@@ -160,3 +191,4 @@ server := websocket.NewWSServer(serverConfig)
 - [github.com/godror/godror](https://github.com/godror/godror)
 - [github.com/fsnotify/fsnotify](https://github.com/fsnotify/fsnotify)
 - [github.com/gorilla/websocket](https://github.com/gorilla/websocket)
+- [github.com/redis/go-redis/v9](https://github.com/redis/go-redis)
