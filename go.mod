@@ -22,6 +22,7 @@ require (
 	github.com/goccy/go-json v0.8.1 // indirect
 	github.com/godror/knownpb v0.3.0 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
+	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869 // indirect
 	github.com/jonboulle/clockwork v0.5.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect

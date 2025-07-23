@@ -10,6 +10,7 @@ Muchinfo MTP2 通用 Go 组件库，适用于企业级微服务、后台系统�
 - database/  —— Oracle 数据库 xorm 封装，支持 zap 日志、慢SQL、熔断
 - http/      —— 标准 HTTP 请求、签名、加解密等工具
 - socket/    —— TCP 网络通信组件，支持客户端、服务器、自动重连、消息广播
+- websocket/ —— WebSocket 网络通信组件，支持客户端、服务器、自动重连、消息广播
 - example/   —— 各模块独立示例
 
 ## 快速开始
@@ -120,7 +121,33 @@ server.BroadcastString("Hello, All Clients!")
 
 详见 [socket/README.md](socket/README.md)
 
-### 7. 示例
+### 7. WebSocket 网络通信
+
+WebSocket 组件为调用者提供企业级的 WebSocket 客户端和服务器功能，支持自动重连、连接管理、消息广播等高级特性。
+
+```go
+import "github.com/muchinfo/mtp2-common-lib/websocket"
+
+// WebSocket客户端
+clientConfig := websocket.WSClientConfig{
+    URL:            "ws://localhost:8080/ws",
+    AutoReconnect:  true,
+    ReconnectDelay: 5 * time.Second,
+}
+client := websocket.NewWSClient(clientConfig)
+
+// WebSocket服务器  
+serverConfig := websocket.WSServerConfig{
+    Address:        ":8080",
+    Path:           "/ws",
+    MaxConnections: 100,
+}
+server := websocket.NewWSServer(serverConfig)
+```
+
+详见 [websocket/README.md](websocket/README.md)
+
+### 8. 示例
 
 所有模块均有独立 example 文件，见 [example/](example/)
 
@@ -132,3 +159,4 @@ server.BroadcastString("Hello, All Clients!")
 - [xorm.io/xorm](https://xorm.io/)
 - [github.com/godror/godror](https://github.com/godror/godror)
 - [github.com/fsnotify/fsnotify](https://github.com/fsnotify/fsnotify)
+- [github.com/gorilla/websocket](https://github.com/gorilla/websocket)
