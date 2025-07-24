@@ -20,11 +20,11 @@ var (
 
 // Config 日志配置结构
 type Config struct {
-	Level      string `json:"level" yaml:"level"`             // 日志级别: debug, info, warn, error
-	Format     string `json:"format" yaml:"format"`           // 日志格式: json, console
-	OutputPath string `json:"output_path" yaml:"output_path"` // 日志输出路径
-	MaxAge     int    `json:"max_age" yaml:"max_age"`         // 日志保留天数; 0 表示永久保留
-	Rotation   int    `json:"rotation" yaml:"rotation"`       // 日志切割时间(小时)
+	Level      string `json:"level"`       // 日志级别: debug, info, warn, error
+	Format     string `json:"format"`      // 日志格式: json, console
+	OutputPath string `json:"output_path"` // 日志输出路径
+	MaxAge     int    `json:"max_age"`     // 日志保留天数; 0 表示永久保留
+	Rotation   int    `json:"rotation"`    // 日志切割时间(小时)
 }
 
 // DefaultConfig 返回默认配置
@@ -87,7 +87,7 @@ func InitWithCallerSkip(config *Config, callerSkip int) error {
 		config.OutputPath+".%Y%m%d%H",
 		rotatelogs.WithLinkName(config.OutputPath),
 		rotatelogs.WithMaxAge(time.Duration(config.MaxAge)*24*time.Hour),
-		rotatelogs.WithRotationTime(time.Hour), // 强制每个自然小时切割
+		rotatelogs.WithRotationTime(time.Duration(config.Rotation)),
 		rotatelogs.WithClock(rotatelogs.Local), // 使用本地时钟，确保自然小时
 	)
 	if err != nil {

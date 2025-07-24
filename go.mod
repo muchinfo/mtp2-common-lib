@@ -3,7 +3,7 @@ module github.com/muchinfo/mtp2-common-lib
 go 1.24.5
 
 require (
-	github.com/fsnotify/fsnotify v1.8.0
+	github.com/fsnotify/fsnotify v1.9.0
 	github.com/godror/godror v0.49.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
